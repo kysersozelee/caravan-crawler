@@ -29,3 +29,6 @@ $ pytest ./test
 Edit Configurations -> Python tests -> Add New Configuration('+') click
   -> Python tests -> py.test -> 'Target setting' with 'Script path' -> select path -> run
 ``` 
+
+## ETC
+- code style : [PEP8](https://www.python.org/dev/peps/pep-0008)
