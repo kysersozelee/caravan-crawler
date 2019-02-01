@@ -4,20 +4,29 @@ import ssl
 import urllib
 from urllib.parse import urlencode
 
-from main.parser.data.AgeRate import AgeRate
-from main.parser.data.ShoppingReponse import ShoppingResponse
+from main.parser.data.rank.keyword_rank.KeywordRank import KeywordRank
+from main.parser.data.rank.RankReponse import RankResponse
+from main.parser.data.shopping.ShoppingReponse import ShoppingResponse
+from main.parser.data.shopping.age_rate.AgeRate import AgeRate
+from main.parser.data.shopping.age_rate.AgeRateInfo import AgeRateInfo
+from main.parser.data.shopping.click_trend.ClickTrend import ClickTrend
+from main.parser.data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
+from main.parser.data.shopping.device_rate.DeviceRate import DeviceRate
+from main.parser.data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
+from main.parser.data.shopping.gender_rate.GenderRate import GenderRate
+from main.parser.data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
 
 
 class ParserMeta(type):
     def __new__(mcs, name, bases, attrs):
-        if '__init__' in attrs:
-            ctor = attrs['__init__']
+        if "__init__" in attrs:
+            ctor = attrs["__init__"]
 
             def init(cls):
                 if not cls._inited:
                     ctor(cls)
 
-            attrs['__init__'] = init
+            attrs["__init__"] = init
         return super().__new__(mcs, name, bases, attrs)
 
 
@@ -57,11 +66,75 @@ class Parser(metaclass=ParserMeta):
         return cls.URLS.get(key)
 
     @classmethod
-    def get_age_rate(cls, params: dict) -> list:
+    def get_age_rate_info_list(cls, params: dict) -> list:
         response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_AGE_RATE), params)
         shopping_response = ShoppingResponse.parse(response)
 
-        return AgeRate.parse(shopping_response)
+        age_rate_info_list = []
+        for result in shopping_response.results:
+            code = result["code"]
+            title = result["title"]
+            full_title = result["fullTitle"]
+            age_rate_list: list = AgeRate.parse(result["data"])
+
+            age_rate_info_list.append(AgeRateInfo(code, title, full_title, age_rate_list))
+
+        return age_rate_info_list
+
+    @classmethod
+    def get_click_trend_info_list(cls, params: dict) -> list:
+        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_CLICK_TREND), params)
+        shopping_response = ShoppingResponse.parse(response)
+
+        click_trend_info_list = []
+        for result in shopping_response.results:
+            code = result["code"]
+            title = result["title"]
+            full_title = result["fullTitle"]
+            click_trend_list: list = ClickTrend.parse(result["data"])
+
+            click_trend_info_list.append(ClickTrendInfo(code, title, full_title, click_trend_list))
+
+        return click_trend_info_list
+
+    @classmethod
+    def get_device_rate(cls, params: dict) -> list:
+        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_DEVICE_RATE), params)
+        shopping_response = ShoppingResponse.parse(response)
+
+        device_rate_info_list = []
+        for result in shopping_response.results:
+            code = result["code"]
+            title = result["title"]
+            full_title = result["fullTitle"]
+            device_rate_list: list = DeviceRate.parse(result["data"])
+
+            device_rate_info_list.append(DeviceRateInfo(code, title, full_title, device_rate_list))
+
+        return device_rate_info_list
+
+    @classmethod
+    def get_gender_rate(cls, params: dict) -> list:
+        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_GENDER_RATE), params)
+        shopping_response = ShoppingResponse.parse(response)
+
+        gender_rate_info_list = []
+        for result in shopping_response.results:
+            code = result["code"]
+            title = result["title"]
+            full_title = result["fullTitle"]
+            gender_rate_list: list = GenderRate.parse(result["data"])
+
+            gender_rate_info_list.append(GenderRateInfo(code, title, full_title, gender_rate_list))
+
+        return gender_rate_info_list
+
+    @classmethod
+    def get_keyword_rank(cls, params: dict) -> list:
+        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_KEYWORD_RANK), params)
+        rank_response = RankResponse.parse(response)
+
+        return KeywordRank.parse(rank_response)
 
     @classmethod
     def datalab_api_call(cls, url: str, params: dict, path_params: str = None) -> dict:

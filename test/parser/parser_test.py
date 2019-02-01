@@ -2,11 +2,15 @@ import json
 import os
 
 from main.parser.Parser import Parser
-from main.parser.data.AgeRate import AgeRate
-from main.parser.data.ShoppingReponse import ShoppingResponse
-
-
+from main.parser.data.rank.keyword_rank.KeywordRank import KeywordRank
+from main.parser.data.shopping.ShoppingReponse import ShoppingResponse
 # TODO : test data 읽어 올 때 상대경로 제거
+from main.parser.data.shopping.age_rate.AgeRateInfo import AgeRateInfo
+from main.parser.data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
+from main.parser.data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
+from main.parser.data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
+
+
 def test_response_data_class():
     with open('%s/../resources/age_rate_sample.txt' % os.path.dirname(os.path.abspath(__file__))) as f:
         response = ShoppingResponse.parse(json.loads(f.readlines()[0]))
@@ -37,11 +41,109 @@ def test_age_rate_parsing(mocker):
         mocker.patch.object(Parser, 'datalab_api_call')
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        age_rate_list = Parser.get_age_rate(params)
+        age_rate_info_list = Parser.get_age_rate_info_list(params)
 
-        assert len(age_rate_list) == 1
-        age_rate: AgeRate = age_rate_list[0]
-        assert len(age_rate.data) == 6
-        assert age_rate.code is None
-        assert age_rate.full_title is None
-        assert age_rate.title == '50001768'
+        assert len(age_rate_info_list) == 1
+        age_rate_info: AgeRateInfo = age_rate_info_list[0]
+
+        age_rate_list: list = age_rate_info.age_rate_list
+        assert len(age_rate_list) == 6
+        assert age_rate_list[0].code == '10'
+        assert age_rate_list[0].label == '10대'
+        assert age_rate_list[0].ratio == 1.83823
+
+        assert age_rate_list[len(age_rate_list) - 1].code == '60'
+        assert age_rate_list[len(age_rate_list) - 1].label == '60대'
+        assert age_rate_list[len(age_rate_list) - 1].ratio == 8.61796
+
+        assert age_rate_info.code is None
+        assert age_rate_info.full_title is None
+        assert age_rate_info.title == '50001768'
+
+
+def test_click_trend_parsing(mocker):
+    with open('%s/../resources/click_trend_sample.txt' % os.path.dirname(os.path.abspath(__file__))) as f:
+        mocker.patch.object(Parser, 'datalab_api_call')
+        Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
+        params = Parser.get_params("50001768", "2019-02-01")
+        click_trend_info_list = Parser.get_click_trend_info_list(params)
+
+        assert len(click_trend_info_list) == 1
+        click_trend_info: ClickTrendInfo = click_trend_info_list[0]
+
+        click_trend_list: list = click_trend_info.click_trend_list
+        assert len(click_trend_list) == 549
+        assert click_trend_list[0].period == '20170801'
+        assert click_trend_list[0].value == 22.82894
+
+        assert click_trend_list[len(click_trend_list) - 1].period == '20190131'
+        assert click_trend_list[len(click_trend_list) - 1].value == 21.27836
+
+        assert click_trend_info.code == '50001768'
+        assert click_trend_info.full_title == '스포츠/레저 > 등산 > 등산화'
+        assert click_trend_info.title == '등산화'
+
+
+def test_device_rate_parsing(mocker):
+    with open('%s/../resources/device_rate_sample.txt' % os.path.dirname(os.path.abspath(__file__))) as f:
+        mocker.patch.object(Parser, 'datalab_api_call')
+        Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
+        params = Parser.get_params("50001768", "2019-02-01")
+        device_rate_info_list = Parser.get_device_rate(params)
+
+        assert len(device_rate_info_list) == 1
+        device_rate_info: DeviceRateInfo = device_rate_info_list[0]
+
+        device_rate_info_list: list = device_rate_info.device_rate_list
+        assert len(device_rate_info_list) == 2
+        assert device_rate_info_list[0].code == 'mo'
+        assert device_rate_info_list[0].label == '모바일'
+        assert device_rate_info_list[0].ratio == 100.0
+
+        assert device_rate_info_list[len(device_rate_info_list) - 1].code == 'pc'
+        assert device_rate_info_list[len(device_rate_info_list) - 1].label == 'PC'
+        assert device_rate_info_list[len(device_rate_info_list) - 1].ratio == 14.39998
+
+        assert device_rate_info.code is None
+        assert device_rate_info.full_title is None
+        assert device_rate_info.title == '50001768'
+
+
+def test_gender_rate_parsing(mocker):
+    with open('%s/../resources/gender_rate_sample.txt' % os.path.dirname(os.path.abspath(__file__))) as f:
+        mocker.patch.object(Parser, 'datalab_api_call')
+        Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
+        params = Parser.get_params("50001768", "2019-02-01")
+        gender_rate_info_list = Parser.get_gender_rate(params)
+
+        assert len(gender_rate_info_list) == 1
+        gender_rate_info: GenderRateInfo = gender_rate_info_list[0]
+
+        gender_rate_list: list = gender_rate_info.gender_rate_list
+        assert len(gender_rate_list) == 2
+        assert gender_rate_list[0].code == 'f'
+        assert gender_rate_list[0].label == '여성'
+        assert gender_rate_list[0].ratio == 59.05537
+
+        assert gender_rate_list[len(gender_rate_list) - 1].code == 'm'
+        assert gender_rate_list[len(gender_rate_list) - 1].label == '남성'
+        assert gender_rate_list[len(gender_rate_list) - 1].ratio == 100.0
+
+        assert gender_rate_info.code is None
+        assert gender_rate_info.full_title is None
+        assert gender_rate_info.title == '50001768'
+
+        assert True
+
+
+def test_keyword_rank_parsing(mocker):
+    with open('%s/../resources/keyword_rank_sample.txt' % os.path.dirname(os.path.abspath(__file__))) as f:
+        mocker.patch.object(Parser, 'datalab_api_call')
+        Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
+        params = Parser.get_params("50001768", "2019-02-01")
+        keyword_rank_list = Parser.get_keyword_rank(params)
+
+        assert len(keyword_rank_list) == 20
+        keyword_rank: KeywordRank = keyword_rank_list[0]
+        assert keyword_rank.keyword == '등산화'
+        assert keyword_rank.linkId == '등산화'

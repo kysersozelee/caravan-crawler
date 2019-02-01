@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from main.parser.data.ShoppingParam import ShoppingParam
+from main.parser.data.shopping.ShoppingParam import ShoppingParam
 
 
 @dataclass(frozen=True)
@@ -10,7 +10,7 @@ class ShoppingResponse:
     shopping_param: ShoppingParam
     chart_type: str
     range: str
-    result: list
+    results: list
     success: bool
 
     @staticmethod
