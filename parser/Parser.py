@@ -5,6 +5,7 @@ import json
 import logging
 import ssl
 import urllib.request
+from typing import Optional
 from urllib.parse import urlencode
 
 from data.rank.RankReponse import RankResponse
@@ -70,7 +71,12 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_age_rate_info_list(cls, params: dict) -> list:
-        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_AGE_RATE), params)
+        url = cls.get_url(cls.CATEGORY_AGE_RATE)
+        response: Optional[dict] = cls.datalab_api_call(url, params)
+        if response is None:
+            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
+            return []
+
         shopping_response = ShoppingResponse.parse(response)
 
         age_rate_info_list = []
@@ -86,7 +92,12 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_click_trend_info_list(cls, params: dict) -> list:
-        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_CLICK_TREND), params)
+        url = cls.get_url(cls.CATEGORY_CLICK_TREND)
+        response: Optional[dict] = cls.datalab_api_call(url, params)
+        if response is None:
+            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
+            return []
+
         shopping_response = ShoppingResponse.parse(response)
 
         click_trend_info_list = []
@@ -102,7 +113,12 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_device_rate(cls, params: dict) -> list:
-        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_DEVICE_RATE), params)
+        url = cls.get_url(cls.CATEGORY_DEVICE_RATE)
+        response: Optional[dict] = cls.datalab_api_call(url, params)
+        if response is None:
+            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
+            return []
+
         shopping_response = ShoppingResponse.parse(response)
 
         device_rate_info_list = []
@@ -118,7 +134,12 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_gender_rate(cls, params: dict) -> list:
-        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_GENDER_RATE), params)
+        url = cls.get_url(cls.CATEGORY_GENDER_RATE)
+        response: Optional[dict] = cls.datalab_api_call(url, params)
+        if response is None:
+            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
+            return []
+
         shopping_response = ShoppingResponse.parse(response)
 
         gender_rate_info_list = []
@@ -134,13 +155,18 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_keyword_rank(cls, params: dict) -> list:
-        response = cls.datalab_api_call(cls.get_url(cls.CATEGORY_KEYWORD_RANK), params)
+        url = cls.get_url(cls.CATEGORY_KEYWORD_RANK)
+        response = cls.datalab_api_call(url, params)
+        if response is None:
+            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
+            return []
+
         rank_response = RankResponse.parse(response)
 
         return KeywordRank.parse(rank_response)
 
     @classmethod
-    def datalab_api_call(cls, url: str, params: dict, path_params: str = None) -> dict:
+    def datalab_api_call(cls, url: str, params: dict, path_params: str = None) -> Optional[dict]:
         request_url = url if path_params is None else "{0}?{1}".format(url, urllib.parse.quote(path_params))
         data = urlencode(params).encode("utf-8")
 
@@ -151,19 +177,22 @@ class Parser(metaclass=ParserMeta):
         req.add_header("Content-Type", "application/x-www-form-urlencoded")
         req.add_header("referer", "https://datalab.naver.com/shoppingInsight/sCategory.naver")
 
-        with urllib.request.urlopen(req, data=data) as response:
-            response_code = response.getcode()
+        try:
+            with urllib.request.urlopen(req, data=data) as response:
+                response_code = response.getcode()
 
-            if response_code is 200:
-                response_body = response.read()
-                response_body_dict = json.loads(response_body.decode("utf-8"))
-                logging.info(response_body_dict)
+                if response_code is 200:
+                    response_body = response.read()
+                    response_body_dict = json.loads(response_body.decode("utf-8"))
+                    logging.info(response_body_dict)
 
-                return response_body_dict
-            else:
-                logging.error("error to request")
-
-        return None
+                    return response_body_dict
+                else:
+                    logging.error("Error to Request. response_code:{}" % response)
+                    return None
+        except Exception as e:
+            logging.error("Error to Open URL for Request. error:{}" % e.message)
+            return None
 
     @classmethod
     def get_params(cls, cid: str, end_date: str, start_date: str = "2017-08-01") -> dict:
