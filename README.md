@@ -5,7 +5,7 @@
 - pyenv
 - python 3.7.0
 
-## install
+## virtual env settings
 ```bash
 # activate venv
 $ python3 -m venv ./venv
@@ -18,3 +18,14 @@ $ pip3 install -r requirements.txt
 $ deactivate
 ```
 
+## test
+##### console
+```bash
+$ pytest ./test
+```
+
+##### intellij
+```text
+Edit Configurations -> Python tests -> Add New Configuration('+') click
+  -> Python tests -> py.test -> 'Target setting' with 'Script path' -> select path -> run
+``` 
