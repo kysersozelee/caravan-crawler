@@ -220,6 +220,14 @@ class Parser(metaclass=ParserMeta):
         return categories
 
     @classmethod
+    def get_category(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
+        response = cls.datalab_api_call(url=url,
+                                        params={},
+                                        path_params="cid=%d" % cid
+                                        )
+        return Category.parse(response)
+
+    @classmethod
     def get_params(cls, cid: str, end_date: str, start_date: str = "2017-08-01") -> dict:
         return {"cid": cid,
                 "timeUnit": "date",
