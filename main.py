@@ -19,13 +19,13 @@ def main():
     logging.info(age_rate_info_list)
 
     click_trend_rate_info_list = Parser().get_click_trend_info_list(params)
-    logging.info(age_rate_info_list)
+    logging.info(click_trend_rate_info_list)
 
     device_rate_info_list = Parser().get_device_rate(params)
-    logging.info(age_rate_info_list)
+    logging.info(device_rate_info_list)
 
     gender_rate_info_list = Parser().get_gender_rate(params)
-    logging.info(age_rate_info_list)
+    logging.info(gender_rate_info_list)
 
     keyword_rank = Parser().get_keyword_rank(params)
     logging.info(keyword_rank)
