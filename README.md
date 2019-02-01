@@ -21,7 +21,7 @@ $ deactivate
 ## test
 ##### console
 ```bash
-$ pytest ./test
+$ pytest -v ./test
 ```
 
 ##### intellij

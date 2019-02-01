@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from dataclasses import dataclass
 
-from app.parser.data.shopping.ShoppingParam import ShoppingParam
+from data.shopping.ShoppingParam import ShoppingParam
 
 
 @dataclass(frozen=True)

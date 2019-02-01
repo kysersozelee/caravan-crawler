@@ -1,20 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import json
 import logging
 import ssl
-import urllib
+import urllib.request
 from urllib.parse import urlencode
 
-from app.parser.data.rank.RankReponse import RankResponse
-from app.parser.data.rank.keyword_rank.KeywordRank import KeywordRank
-from app.parser.data.shopping.ShoppingReponse import ShoppingResponse
-from app.parser.data.shopping.age_rate.AgeRate import AgeRate
-from app.parser.data.shopping.age_rate.AgeRateInfo import AgeRateInfo
-from app.parser.data.shopping.click_trend.ClickTrend import ClickTrend
-from app.parser.data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
-from app.parser.data.shopping.device_rate.DeviceRate import DeviceRate
-from app.parser.data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
-from app.parser.data.shopping.gender_rate.GenderRate import GenderRate
-from app.parser.data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
+from data.rank.RankReponse import RankResponse
+from data.rank.keyword_rank.KeywordRank import KeywordRank
+from data.shopping.ShoppingReponse import ShoppingResponse
+from data.shopping.age_rate.AgeRate import AgeRate
+from data.shopping.age_rate.AgeRateInfo import AgeRateInfo
+from data.shopping.click_trend.ClickTrend import ClickTrend
+from data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
+from data.shopping.device_rate.DeviceRate import DeviceRate
+from data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
+from data.shopping.gender_rate.GenderRate import GenderRate
+from data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
 
 
 class ParserMeta(type):

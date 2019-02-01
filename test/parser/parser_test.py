@@ -4,16 +4,15 @@
 import json
 import os
 
-from app.parser.Parser import Parser
-from app.parser.data.rank.keyword_rank.KeywordRank import KeywordRank
-from app.parser.data.shopping.ShoppingReponse import ShoppingResponse
-from app.parser.data.shopping.age_rate.AgeRateInfo import AgeRateInfo
-from app.parser.data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
-from app.parser.data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
-from app.parser.data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
-
-
 # TODO : test data 읽어 올 때 상대경로 제거
+from data.rank.keyword_rank.KeywordRank import KeywordRank
+from data.shopping.ShoppingReponse import ShoppingResponse
+from data.shopping.age_rate.AgeRateInfo import AgeRateInfo
+from data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
+from data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
+from parser.Parser import Parser
+
+
 def test_response_data_class():
     with open('%s/../resources/age_rate_sample.txt' % os.path.dirname(os.path.abspath(__file__))) as f:
         response = ShoppingResponse.parse(json.loads(f.readlines()[0]))

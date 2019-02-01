@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from dataclasses import dataclass
 
-from app.parser.data.rank.RankReponse import RankResponse
+from data.rank.RankReponse import RankResponse
 
 
 @dataclass(frozen=True)
