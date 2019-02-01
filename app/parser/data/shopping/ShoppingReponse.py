@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from main.parser.data.shopping.ShoppingParam import ShoppingParam
+from app.parser.data.shopping.ShoppingParam import ShoppingParam
 
 
 @dataclass(frozen=True)

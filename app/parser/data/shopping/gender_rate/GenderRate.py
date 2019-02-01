@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from main.parser.data.shopping import ShoppingReponse
-
 
 @dataclass(frozen=True)
 class GenderRate:

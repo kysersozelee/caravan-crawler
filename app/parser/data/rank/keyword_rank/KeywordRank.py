@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from main.parser.data.rank.RankReponse import RankResponse
+from app.parser.data.rank.RankReponse import RankResponse
 
 
 @dataclass(frozen=True)

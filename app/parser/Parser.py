@@ -4,17 +4,17 @@ import ssl
 import urllib
 from urllib.parse import urlencode
 
-from main.parser.data.rank.keyword_rank.KeywordRank import KeywordRank
-from main.parser.data.rank.RankReponse import RankResponse
-from main.parser.data.shopping.ShoppingReponse import ShoppingResponse
-from main.parser.data.shopping.age_rate.AgeRate import AgeRate
-from main.parser.data.shopping.age_rate.AgeRateInfo import AgeRateInfo
-from main.parser.data.shopping.click_trend.ClickTrend import ClickTrend
-from main.parser.data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
-from main.parser.data.shopping.device_rate.DeviceRate import DeviceRate
-from main.parser.data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
-from main.parser.data.shopping.gender_rate.GenderRate import GenderRate
-from main.parser.data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
+from app.parser.data.rank.RankReponse import RankResponse
+from app.parser.data.rank.keyword_rank.KeywordRank import KeywordRank
+from app.parser.data.shopping.ShoppingReponse import ShoppingResponse
+from app.parser.data.shopping.age_rate.AgeRate import AgeRate
+from app.parser.data.shopping.age_rate.AgeRateInfo import AgeRateInfo
+from app.parser.data.shopping.click_trend.ClickTrend import ClickTrend
+from app.parser.data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
+from app.parser.data.shopping.device_rate.DeviceRate import DeviceRate
+from app.parser.data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
+from app.parser.data.shopping.gender_rate.GenderRate import GenderRate
+from app.parser.data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
 
 
 class ParserMeta(type):
