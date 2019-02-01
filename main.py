@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import sys
 from datetime import datetime, timedelta
 
 import pytz
@@ -12,20 +11,6 @@ from parser.Parser import Parser
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
-
-
-    try:
-        logging.info(sys.version)
-    except ImportError as error:
-        # Output expected ImportErrors.
-        logging.error(error)
-        # Include the name and path attributes in output.
-        logging.error(f'error.name: {error.name}')
-        logging.error(f'error.path: {error.path}')
-    except Exception as exception:
-        # Output unexpected Exceptions.
-        logging.error(exception, False)
-
 
     etl_date = (datetime.now(pytz.timezone('Asia/Seoul')) - timedelta(days=1)).strftime('%Y-%m-%d')
 
