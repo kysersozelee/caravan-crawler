@@ -98,7 +98,7 @@ class Parser(metaclass=ParserMeta):
         return shopping_response.shopping_param, info_list
 
     @classmethod
-    def get_keyword_rank(cls, params: dict) -> list:
+    def get_keyword_rank(cls, params: dict) -> (str, list):
         url = cls.get_url(cls.CATEGORY_KEYWORD_RANK)
         response = cls.datalab_api_call(url, params)
         if response is None:
@@ -107,7 +107,7 @@ class Parser(metaclass=ParserMeta):
 
         rank_response = RankResponse.parse(response)
 
-        return KeywordRank.parse(rank_response)
+        return rank_response.range, KeywordRank.parse(rank_response)
 
     @classmethod
     def datalab_api_call(cls, url: str, params: dict, path_params: str = None) -> Optional[dict]:

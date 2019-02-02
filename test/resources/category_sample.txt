@@ -1,0 +1,1 @@
+{"cid":50004000,"pid":50001476,"name":"수면양말","parentPath":"패션잡화 > 양말 > 여성양말","level":4,"expsOrder":7,"parents":[{"cid":0,"name":"전체"},{"cid":50000001,"name":"패션잡화"},{"cid":50000166,"name":"양말"},{"cid":50001476,"name":"여성양말"}],"childList":[],"leaf":true,"deleted":false,"svcUse":true,"fullPath":"패션잡화 > 양말 > 여성양말 > 수면양말","sblogUse":true}
