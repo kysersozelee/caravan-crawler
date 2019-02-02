@@ -1,0 +1,6 @@
+requests==2.21.0
+BeautifulSoup4==4.7.1
+certifi==2018.11.29
+pytest==4.2.0
+pytest-mock==1.10.0
+pytz==2018.9
