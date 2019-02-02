@@ -40,13 +40,9 @@ class Parser(metaclass=ParserMeta):
     CATEGORY_GENDER_RATE = "get_category_gender_rate"
     CATEGORY_DEVICE_RATE = "get_category_device_rate"
     CATEGORY_CLICK_TREND = "get_category_click_trend"
+    CATEGORY = "get_category"
 
-    URLS = {CATEGORY_CLICK_TREND: "https://datalab.naver.com/shoppingInsight/getCategoryClickTrend.naver",
-            CATEGORY_DEVICE_RATE: "https://datalab.naver.com/shoppingInsight/getCategoryDeviceRate.naver",
-            CATEGORY_GENDER_RATE: "https://datalab.naver.com/shoppingInsight/getCategoryGenderRate.naver",
-            CATEGORY_AGE_RATE: "https://datalab.naver.com/shoppingInsight/getCategoryAgeRate.naver",
-            CATEGORY_KEYWORD_RANK: "https://datalab.naver.com/shoppingInsight/getCategoryKeywordRank.naver"
-            }
+    SHOPPING_INSIGHT_URL = "https://datalab.naver.com/shoppingInsight/getCategoryClickTrend"
 
     _instance = None
     _inited = False
@@ -67,20 +63,11 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_url(cls, key: str):
-        return cls.URLS.get(key)
+        return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
 
     @classmethod
     def shopping_request(cls, key: str, params: dict) -> (ShoppingParam, list):
-        url = {
-            cls.CATEGORY_AGE_RATE: cls.URLS.get(cls.CATEGORY_AGE_RATE),
-            cls.CATEGORY_GENDER_RATE: cls.URLS.get(cls.CATEGORY_GENDER_RATE),
-            cls.CATEGORY_DEVICE_RATE: cls.URLS.get(cls.CATEGORY_DEVICE_RATE),
-            cls.CATEGORY_CLICK_TREND: cls.URLS.get(cls.CATEGORY_CLICK_TREND)
-        }.get(key, None)
-
-        if url is None:
-            logging.error("Invalid url! url:{}, params:{}".format(url, params))
-            return []
+        url = cls.get_url(key)
 
         response: Optional[dict] = cls.datalab_api_call(url, params)
         if response is None:
@@ -155,8 +142,8 @@ class Parser(metaclass=ParserMeta):
     # Warning: 2019/02/01 기준 카테고리가 4,485개 존재. 50,000,000 ~ 50,004,485
     # 아래 메소드는 모든 카테고리를 재귀를 돌며 데이터 크롤링하는 함수로 시간이 매우 많이 걸림. sleep 없이 사용하면 접근 거부됨.
     @classmethod
-    def get_all_categories(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
-        response = cls.datalab_api_call(url=url,
+    def get_all_categories(cls, cid=0):
+        response = cls.datalab_api_call(url=cls.get_url(cls.CATEGORY),
                                         params={},
                                         path_params="cid=%d" % cid
                                         )
@@ -175,8 +162,8 @@ class Parser(metaclass=ParserMeta):
         return categories
 
     @classmethod
-    def get_category(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
-        response = cls.datalab_api_call(url=url,
+    def get_category(cls, cid=0):
+        response = cls.datalab_api_call(url=cls.get_url(cls.CATEGORY),
                                         params={},
                                         path_params="cid=%d" % cid
                                         )
