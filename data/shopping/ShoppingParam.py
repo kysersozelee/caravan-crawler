@@ -18,7 +18,7 @@ class ShoppingParam:
     count: int
     type: str
     date: str
-    dateRange: str
+    date_range: str
 
     @staticmethod
     def parse(shopping_param: dict):
