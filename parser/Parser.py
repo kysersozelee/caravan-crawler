@@ -12,15 +12,12 @@ from urllib.parse import urlencode
 from data.category.Category import Category
 from data.rank.RankReponse import RankResponse
 from data.rank.keyword_rank.KeywordRank import KeywordRank
+from data.shopping.ShoppingInfo import ShoppingInfo
 from data.shopping.ShoppingReponse import ShoppingResponse
 from data.shopping.age_rate.AgeRate import AgeRate
-from data.shopping.age_rate.AgeRateInfo import AgeRateInfo
 from data.shopping.click_trend.ClickTrend import ClickTrend
-from data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
 from data.shopping.device_rate.DeviceRate import DeviceRate
-from data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
 from data.shopping.gender_rate.GenderRate import GenderRate
-from data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
 
 
 class ParserMeta(type):
@@ -99,17 +96,16 @@ class Parser(metaclass=ParserMeta):
             data = result["data"]
             if key == cls.CATEGORY_AGE_RATE:
                 data_list: list = AgeRate.parse(data)
-                info_list.append(AgeRateInfo(code, title, full_title, data_list))
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
             elif key == cls.CATEGORY_GENDER_RATE:
                 data_list: list = GenderRate.parse(data)
-                info_list.append(GenderRateInfo(code, title, full_title, data_list))
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
             elif key == cls.CATEGORY_DEVICE_RATE:
                 data_list: list = DeviceRate.parse(data)
-                info_list.append(DeviceRateInfo(code, title, full_title, data_list))
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
             elif key == cls.CATEGORY_CLICK_TREND:
                 data_list: list = ClickTrend.parse(data)
-                info_list.append(ClickTrendInfo(code, title, full_title, data_list))
-
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
 
         return info_list
 
