@@ -6,11 +6,8 @@ import os
 
 # TODO : test data 읽어 올 때 상대경로 제거
 from data.rank.keyword_rank.KeywordRank import KeywordRank
+from data.shopping.ShoppingInfo import ShoppingInfo
 from data.shopping.ShoppingReponse import ShoppingResponse
-from data.shopping.age_rate.AgeRateInfo import AgeRateInfo
-from data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
-from data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
-from data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
 from parser.Parser import Parser
 
 
@@ -44,12 +41,12 @@ def test_age_rate_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        age_rate_info_list = Parser.shopping_request(Parser.CATEGORY_AGE_RATE, params)
+        shopping_param, age_rate_info_list = Parser.shopping_request(Parser.CATEGORY_AGE_RATE, params)
 
         assert len(age_rate_info_list) == 1
-        age_rate_info: AgeRateInfo = age_rate_info_list[0]
+        age_rate_info: ShoppingInfo = age_rate_info_list[0]
 
-        age_rate_list: list = age_rate_info.age_rate_list
+        age_rate_list: list = age_rate_info.data_list
         assert len(age_rate_list) == 6
         assert age_rate_list[0].code == "10"
         assert age_rate_list[0].label == "10대"
@@ -69,12 +66,12 @@ def test_click_trend_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        click_trend_info_list = Parser.shopping_request(Parser.CATEGORY_CLICK_TREND, params)
+        shopping_param, click_trend_info_list = Parser.shopping_request(Parser.CATEGORY_CLICK_TREND, params)
 
         assert len(click_trend_info_list) == 1
-        click_trend_info: ClickTrendInfo = click_trend_info_list[0]
+        click_trend_info: ShoppingInfo = click_trend_info_list[0]
 
-        click_trend_list: list = click_trend_info.click_trend_list
+        click_trend_list: list = click_trend_info.data_list
         assert len(click_trend_list) == 549
         assert click_trend_list[0].period == "20170801"
         assert click_trend_list[0].value == 22.82894
@@ -92,12 +89,12 @@ def test_device_rate_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        device_rate_info_list = Parser.shopping_request(Parser.CATEGORY_DEVICE_RATE, params)
+        shopping_param, device_rate_info_list = Parser.shopping_request(Parser.CATEGORY_DEVICE_RATE, params)
 
         assert len(device_rate_info_list) == 1
-        device_rate_info: DeviceRateInfo = device_rate_info_list[0]
+        device_rate_info: ShoppingInfo = device_rate_info_list[0]
 
-        device_rate_info_list: list = device_rate_info.device_rate_list
+        device_rate_info_list: list = device_rate_info.data_list
         assert len(device_rate_info_list) == 2
         assert device_rate_info_list[0].code == "mo"
         assert device_rate_info_list[0].label == "모바일"
@@ -117,12 +114,12 @@ def test_gender_rate_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        gender_rate_info_list = Parser.shopping_request(Parser.CATEGORY_GENDER_RATE, params)
+        shopping_param, gender_rate_info_list = Parser.shopping_request(Parser.CATEGORY_GENDER_RATE, params)
 
         assert len(gender_rate_info_list) == 1
-        gender_rate_info: GenderRateInfo = gender_rate_info_list[0]
+        gender_rate_info: ShoppingInfo = gender_rate_info_list[0]
 
-        gender_rate_list: list = gender_rate_info.gender_rate_list
+        gender_rate_list: list = gender_rate_info.data_list
         assert len(gender_rate_list) == 2
         assert gender_rate_list[0].code == "f"
         assert gender_rate_list[0].label == "여성"

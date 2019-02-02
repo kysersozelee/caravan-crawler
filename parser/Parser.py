@@ -13,6 +13,7 @@ from data.category.Category import Category
 from data.rank.RankReponse import RankResponse
 from data.rank.keyword_rank.KeywordRank import KeywordRank
 from data.shopping.ShoppingInfo import ShoppingInfo
+from data.shopping.ShoppingParam import ShoppingParam
 from data.shopping.ShoppingReponse import ShoppingResponse
 from data.shopping.age_rate.AgeRate import AgeRate
 from data.shopping.click_trend.ClickTrend import ClickTrend
@@ -69,7 +70,7 @@ class Parser(metaclass=ParserMeta):
         return cls.URLS.get(key)
 
     @classmethod
-    def shopping_request(cls, key: str, params: dict):
+    def shopping_request(cls, key: str, params: dict) -> (ShoppingParam, list):
         url = {
             cls.CATEGORY_AGE_RATE: cls.URLS.get(cls.CATEGORY_AGE_RATE),
             cls.CATEGORY_GENDER_RATE: cls.URLS.get(cls.CATEGORY_GENDER_RATE),
@@ -107,7 +108,7 @@ class Parser(metaclass=ParserMeta):
                 data_list: list = ClickTrend.parse(data)
                 info_list.append(ShoppingInfo(code, title, full_title, data_list))
 
-        return info_list
+        return shopping_response.shopping_param, info_list
 
     @classmethod
     def get_keyword_rank(cls, params: dict) -> list:
