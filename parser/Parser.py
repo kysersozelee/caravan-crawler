@@ -5,9 +5,11 @@ import json
 import logging
 import ssl
 import urllib.request
+from time import sleep
 from typing import Optional
 from urllib.parse import urlencode
 
+from data.category.Category import Category
 from data.rank.RankReponse import RankResponse
 from data.rank.keyword_rank.KeywordRank import KeywordRank
 from data.shopping.ShoppingReponse import ShoppingResponse
@@ -167,7 +169,7 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def datalab_api_call(cls, url: str, params: dict, path_params: str = None) -> Optional[dict]:
-        request_url = url if path_params is None else "{0}?{1}".format(url, urllib.parse.quote(path_params))
+        request_url = url if path_params is None else "{0}?{1}".format(url, path_params)
         data = urlencode(params).encode("utf-8")
 
         req = urllib.request.Request(request_url)
@@ -185,6 +187,7 @@ class Parser(metaclass=ParserMeta):
                     response_body = response.read()
                     response_body_dict = json.loads(response_body.decode("utf-8"))
                     logging.info(response_body_dict)
+                    response.close()
 
                     return response_body_dict
                 else:
@@ -193,6 +196,36 @@ class Parser(metaclass=ParserMeta):
         except Exception as e:
             logging.error("Error to Open URL for Request. error:{}" % e.message)
             return None
+
+    # Warning: 2019/02/01 기준 카테고리가 4,485개 존재. 50,000,000 ~ 50,004,485
+    # 아래 메소드는 모든 카테고리를 재귀를 돌며 데이터 크롤링하는 함수로 시간이 매우 많이 걸림. sleep 없이 사용하면 접근 거부됨.
+    @classmethod
+    def get_all_categories(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
+        response = cls.datalab_api_call(url=url,
+                                        params={},
+                                        path_params="cid=%d" % cid
+                                        )
+        categories = Category.parse(response)
+
+        for child_category in categories.child_list:
+            child_cid = child_category.cid
+            full_path = child_category.full_path
+            logging.info(full_path)
+            sleep(3)
+            if child_category.leaf:
+                return [child_category]
+            grand_child_category_list = cls.get_all_categories(cid=child_cid)
+            child_category.child_list.append(grand_child_category_list)
+
+        return categories
+
+    @classmethod
+    def get_category(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
+        response = cls.datalab_api_call(url=url,
+                                        params={},
+                                        path_params="cid=%d" % cid
+                                        )
+        return Category.parse(response)
 
     @classmethod
     def get_params(cls, cid: str, end_date: str, start_date: str = "2017-08-01") -> dict:
