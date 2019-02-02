@@ -149,4 +149,4 @@ def test_keyword_rank_parsing(mocker):
         assert len(keyword_rank_list) == 20
         keyword_rank: KeywordRank = keyword_rank_list[0]
         assert keyword_rank.keyword == "등산화"
-        assert keyword_rank.linkId == "등산화"
+        assert keyword_rank.link_id == "등산화"

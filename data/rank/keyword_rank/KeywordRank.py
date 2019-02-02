@@ -10,7 +10,7 @@ from data.rank.RankReponse import RankResponse
 class KeywordRank:
     rank: int
     keyword: str
-    linkId: str
+    link_id: str
 
     @staticmethod
     def parse(rank_response: RankResponse) -> list:
