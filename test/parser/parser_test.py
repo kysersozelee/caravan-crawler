@@ -44,7 +44,7 @@ def test_age_rate_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        age_rate_info_list = Parser.get_age_rate_info_list(params)
+        age_rate_info_list = Parser.shopping_request(Parser.CATEGORY_AGE_RATE, params)
 
         assert len(age_rate_info_list) == 1
         age_rate_info: AgeRateInfo = age_rate_info_list[0]
@@ -69,7 +69,7 @@ def test_click_trend_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        click_trend_info_list = Parser.get_click_trend_info_list(params)
+        click_trend_info_list = Parser.shopping_request(Parser.CATEGORY_CLICK_TREND, params)
 
         assert len(click_trend_info_list) == 1
         click_trend_info: ClickTrendInfo = click_trend_info_list[0]
@@ -92,7 +92,7 @@ def test_device_rate_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        device_rate_info_list = Parser.get_device_rate(params)
+        device_rate_info_list = Parser.shopping_request(Parser.CATEGORY_DEVICE_RATE, params)
 
         assert len(device_rate_info_list) == 1
         device_rate_info: DeviceRateInfo = device_rate_info_list[0]
@@ -117,7 +117,7 @@ def test_gender_rate_parsing(mocker):
         mocker.patch.object(Parser, "datalab_api_call")
         Parser.datalab_api_call.return_value = json.loads(f.readlines()[0])
         params = Parser.get_params("50001768", "2019-02-01")
-        gender_rate_info_list = Parser.get_gender_rate(params)
+        gender_rate_info_list = Parser.shopping_request(Parser.CATEGORY_GENDER_RATE, params)
 
         assert len(gender_rate_info_list) == 1
         gender_rate_info: GenderRateInfo = gender_rate_info_list[0]
