@@ -1,7 +1,7 @@
-from dataclasses import dataclass#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
