@@ -5,7 +5,6 @@ import json
 import logging
 import ssl
 import urllib.request
-from time import sleep
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -19,6 +18,7 @@ from data.shopping.age_rate.AgeRate import AgeRate
 from data.shopping.click_trend.ClickTrend import ClickTrend
 from data.shopping.device_rate.DeviceRate import DeviceRate
 from data.shopping.gender_rate.GenderRate import GenderRate
+from db.DbConnector import DbConnector
 
 
 class ParserMeta(type):
@@ -139,30 +139,20 @@ class Parser(metaclass=ParserMeta):
                     logging.error("Error to Request. response_code:{}" % response)
                     return None
         except Exception as e:
-            logging.error("Error to Open URL for Request. error:{}" % e.message)
             return None
 
     # Warning: 2019/02/01 기준 카테고리가 4,485개 존재. 50,000,000 ~ 50,004,485
     # 아래 메소드는 모든 카테고리를 재귀를 돌며 데이터 크롤링하는 함수로 시간이 매우 많이 걸림. sleep 없이 사용하면 접근 거부됨.
     @classmethod
-    def get_all_categories(cls, cid=0):
-        response = cls.datalab_api_call(url=cls.get_url(cls.CATEGORY),
-                                        params={},
-                                        path_params="cid=%d" % cid
-                                        )
-        categories = Category.parse(response)
+    def insert_all_categories(cls, cid=0):
+        category = cls.get_category(cid=cid)
+        DbConnector().insert_category(category)
 
-        for child_category in categories.child_list:
-            child_cid = child_category.cid
-            full_path = child_category.full_path
-            logging.info(full_path)
-            sleep(3)
+        for child_category in category.child_list:
             if child_category.leaf:
-                return [child_category]
-            grand_child_category_list = cls.get_all_categories(cid=child_cid)
-            child_category.child_list.append(grand_child_category_list)
-
-        return categories
+                DbConnector().insert_category(child_category)
+            else:
+                cls.get_all_categories(child_category.cid)
 
     @classmethod
     def get_category(cls, cid=0):
@@ -170,7 +160,10 @@ class Parser(metaclass=ParserMeta):
                                         params={},
                                         path_params="cid=%d" % cid
                                         )
-        return Category.parse(response)
+        if response is not None:
+            return Category.parse(response)
+        else:
+            return None
 
     @classmethod
     def get_params(cls, cid: str, end_date: str, start_date: str = "2017-08-01") -> dict:

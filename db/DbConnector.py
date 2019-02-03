@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import json
 import logging
 from datetime import datetime
 
 import pandas as pd
 import pytz
 import sqlalchemy as db
+from MySQLdb._exceptions import Error
 
 from data.category.Category import Category
 from data.rank.keyword_rank.KeywordRank import KeywordRank
@@ -94,10 +94,14 @@ class DbConnector(metaclass=DbConnectorMeta):
             )
             pass
 
-        result_proxy = self._connection.execute(query, values_list)
-        return result_proxy.rowcount
+        try:
+            result_proxy = self._connection.execute(query, values_list)
+            return result_proxy.rowcount
+        except Error as e:
+            logging.error("Error to execute query. query:%s" % query)
+            return -1
 
-    def insert_category(self, category: Category):
+    def insert_category(self, category: Category) -> list:
         table = db.Table("category", self._metadata, autoload=True, autoload_with=self._engine)
 
         child_list = list(map(lambda child_category: child_category.cid, category.child_list))
@@ -116,9 +120,12 @@ class DbConnector(metaclass=DbConnectorMeta):
                                         sblog_use=category.sblog_use,
                                         full_path=category.full_path
                                         )
-
-        result_proxy = self._connection.execute(query)
-        return result_proxy.inserted_primary_key
+        try:
+            result_proxy = self._connection.execute(query)
+            return result_proxy.inserted_primary_key
+        except Error as e:
+            logging.error("Error to execute query. query:%s" % query)
+            return []
 
     def insert_trend(self, table_name: str, info_id: int, data_list: list) -> int:
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
@@ -134,8 +141,12 @@ class DbConnector(metaclass=DbConnectorMeta):
             )
             pass
 
-        result_proxy = self._connection.execute(query, values_list)
-        return result_proxy.rowcount
+        try:
+            result_proxy = self._connection.execute(query, values_list)
+            return result_proxy.rowcount
+        except Error as e:
+            logging.error("Error to execute query. query:%s" % query)
+            return -1
 
     # TODO : range 추가
     def insert_rank(self, table_name: str, range: str, keyword_rank: KeywordRank):
@@ -148,5 +159,9 @@ class DbConnector(metaclass=DbConnectorMeta):
                                         etl_date=datetime.now(pytz.timezone('Asia/Seoul')).strftime('%Y-%m-%d')
                                         )
 
-        result_proxy = self._connection.execute(query)
-        return result_proxy.inserted_primary_key
+        try:
+            result_proxy = self._connection.execute(query)
+            return result_proxy.inserted_primary_key
+        except Error as e:
+            logging.error("Error to execute query. query:%s" % query)
+            return []
