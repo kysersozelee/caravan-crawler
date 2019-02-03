@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import json
 import logging
 from datetime import datetime
 
@@ -99,6 +100,8 @@ class DbConnector(metaclass=DbConnectorMeta):
     def insert_category(self, category: Category):
         table = db.Table("category", self._metadata, autoload=True, autoload_with=self._engine)
 
+        child_list = list(map(lambda child_category: child_category.cid, category.child_list))
+
         query = db.insert(table).values(id=category.cid,
                                         pid=category.pid,
                                         name=category.name,
@@ -106,7 +109,7 @@ class DbConnector(metaclass=DbConnectorMeta):
                                         level=category.level,
                                         exps_order=category.exps_order,
                                         parents=category.parents,
-                                        child_list=category.child_list,
+                                        child_list=child_list,
                                         leaf=category.leaf,
                                         deleted=category.deleted,
                                         svc_use=category.svc_use,
