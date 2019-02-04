@@ -15,16 +15,16 @@ def main():
     etl_date = (datetime.now(pytz.timezone('Asia/Seoul')) - timedelta(days=1)).strftime('%Y-%m-%d')
 
     params = Parser().get_params("50001768,50001769", etl_date)
-    age_rate_info_list = Parser().get_age_rate_info_list(params)
+    age_rate_info_list = Parser().shopping_request(Parser.CATEGORY_AGE_RATE, params)
     logging.info(age_rate_info_list)
 
-    click_trend_rate_info_list = Parser().get_click_trend_info_list(params)
+    click_trend_rate_info_list = Parser().shopping_request(Parser.CATEGORY_CLICK_TREND, params)
     logging.info(click_trend_rate_info_list)
 
-    device_rate_info_list = Parser().get_device_rate(params)
+    device_rate_info_list = Parser().shopping_request(Parser.CATEGORY_DEVICE_RATE, params)
     logging.info(device_rate_info_list)
 
-    gender_rate_info_list = Parser().get_gender_rate(params)
+    gender_rate_info_list = Parser().shopping_request(Parser.CATEGORY_GENDER_RATE, params)
     logging.info(gender_rate_info_list)
 
     keyword_rank = Parser().get_keyword_rank(params)

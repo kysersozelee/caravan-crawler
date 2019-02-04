@@ -5,8 +5,8 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class ClickTrendInfo:
+class ShoppingInfo:
     code: str
     title: str
     full_title: str
-    click_trend_list: list
+    data_list: list

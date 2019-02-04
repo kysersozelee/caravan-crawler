@@ -12,15 +12,12 @@ from urllib.parse import urlencode
 from data.category.Category import Category
 from data.rank.RankReponse import RankResponse
 from data.rank.keyword_rank.KeywordRank import KeywordRank
+from data.shopping.ShoppingInfo import ShoppingInfo
 from data.shopping.ShoppingReponse import ShoppingResponse
 from data.shopping.age_rate.AgeRate import AgeRate
-from data.shopping.age_rate.AgeRateInfo import AgeRateInfo
 from data.shopping.click_trend.ClickTrend import ClickTrend
-from data.shopping.click_trend.ClickTrendInfo import ClickTrendInfo
 from data.shopping.device_rate.DeviceRate import DeviceRate
-from data.shopping.device_rate.DeviceRateInfo import DeviceRateInfo
 from data.shopping.gender_rate.GenderRate import GenderRate
-from data.shopping.gender_rate.GenderRateInfo import GenderRateInfo
 
 
 class ParserMeta(type):
@@ -72,88 +69,45 @@ class Parser(metaclass=ParserMeta):
         return cls.URLS.get(key)
 
     @classmethod
-    def get_age_rate_info_list(cls, params: dict) -> list:
-        url = cls.get_url(cls.CATEGORY_AGE_RATE)
+    def shopping_request(cls, key: str, params: dict):
+        url = {
+            cls.CATEGORY_AGE_RATE: cls.URLS.get(cls.CATEGORY_AGE_RATE),
+            cls.CATEGORY_GENDER_RATE: cls.URLS.get(cls.CATEGORY_GENDER_RATE),
+            cls.CATEGORY_DEVICE_RATE: cls.URLS.get(cls.CATEGORY_DEVICE_RATE),
+            cls.CATEGORY_CLICK_TREND: cls.URLS.get(cls.CATEGORY_CLICK_TREND)
+        }.get(key, None)
+
+        if url is None:
+            logging.error("Invalid url! url:{}, params:{}".format(url, params))
+            return []
+
         response: Optional[dict] = cls.datalab_api_call(url, params)
         if response is None:
-            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
+            logging.error("Got Empty Response! url:{}, params:{}".format(url, params))
             return []
 
         shopping_response = ShoppingResponse.parse(response)
 
-        age_rate_info_list = []
+        info_list = []
         for result in shopping_response.results:
             code = result["code"]
             title = result["title"]
             full_title = result["fullTitle"]
-            age_rate_list: list = AgeRate.parse(result["data"])
+            data = result["data"]
+            if key == cls.CATEGORY_AGE_RATE:
+                data_list: list = AgeRate.parse(data)
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
+            elif key == cls.CATEGORY_GENDER_RATE:
+                data_list: list = GenderRate.parse(data)
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
+            elif key == cls.CATEGORY_DEVICE_RATE:
+                data_list: list = DeviceRate.parse(data)
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
+            elif key == cls.CATEGORY_CLICK_TREND:
+                data_list: list = ClickTrend.parse(data)
+                info_list.append(ShoppingInfo(code, title, full_title, data_list))
 
-            age_rate_info_list.append(AgeRateInfo(code, title, full_title, age_rate_list))
-
-        return age_rate_info_list
-
-    @classmethod
-    def get_click_trend_info_list(cls, params: dict) -> list:
-        url = cls.get_url(cls.CATEGORY_CLICK_TREND)
-        response: Optional[dict] = cls.datalab_api_call(url, params)
-        if response is None:
-            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
-            return []
-
-        shopping_response = ShoppingResponse.parse(response)
-
-        click_trend_info_list = []
-        for result in shopping_response.results:
-            code = result["code"]
-            title = result["title"]
-            full_title = result["fullTitle"]
-            click_trend_list: list = ClickTrend.parse(result["data"])
-
-            click_trend_info_list.append(ClickTrendInfo(code, title, full_title, click_trend_list))
-
-        return click_trend_info_list
-
-    @classmethod
-    def get_device_rate(cls, params: dict) -> list:
-        url = cls.get_url(cls.CATEGORY_DEVICE_RATE)
-        response: Optional[dict] = cls.datalab_api_call(url, params)
-        if response is None:
-            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
-            return []
-
-        shopping_response = ShoppingResponse.parse(response)
-
-        device_rate_info_list = []
-        for result in shopping_response.results:
-            code = result["code"]
-            title = result["title"]
-            full_title = result["fullTitle"]
-            device_rate_list: list = DeviceRate.parse(result["data"])
-
-            device_rate_info_list.append(DeviceRateInfo(code, title, full_title, device_rate_list))
-
-        return device_rate_info_list
-
-    @classmethod
-    def get_gender_rate(cls, params: dict) -> list:
-        url = cls.get_url(cls.CATEGORY_GENDER_RATE)
-        response: Optional[dict] = cls.datalab_api_call(url, params)
-        if response is None:
-            logging.error("Got Empty Response! url:{} params:{}".format(url, params))
-            return []
-
-        shopping_response = ShoppingResponse.parse(response)
-
-        gender_rate_info_list = []
-        for result in shopping_response.results:
-            code = result["code"]
-            title = result["title"]
-            full_title = result["fullTitle"]
-            gender_rate_list: list = GenderRate.parse(result["data"])
-
-            gender_rate_info_list.append(GenderRateInfo(code, title, full_title, gender_rate_list))
-
-        return gender_rate_info_list
+        return info_list
 
     @classmethod
     def get_keyword_rank(cls, params: dict) -> list:
