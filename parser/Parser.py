@@ -63,10 +63,7 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_url(cls, key: str):
-        if key == cls.CATEGORY:
             return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
-        else:
-            return "{0}/getCategoryClickTrend/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
 
     @classmethod
     def shopping_request(cls, key: str, params: dict) -> (ShoppingParam, list):
@@ -152,7 +149,7 @@ class Parser(metaclass=ParserMeta):
             if child_category.leaf:
                 DbConnector().insert_category(child_category)
             else:
-                cls.get_all_categories(child_category.cid)
+                cls.insert_all_categories(child_category.cid)
 
     @classmethod
     def get_category(cls, cid=0):
