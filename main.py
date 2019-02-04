@@ -27,7 +27,7 @@ def main():
     gender_rate_info_list = Parser().shopping_request(Parser.CATEGORY_GENDER_RATE, params)
     logging.info(gender_rate_info_list)
 
-    keyword_rank = Parser().get_keyword_rank(params)
+    range, keyword_rank = Parser().get_keyword_rank(params)
     logging.info(keyword_rank)
 
 

@@ -5,7 +5,6 @@ import json
 import logging
 import ssl
 import urllib.request
-from time import sleep
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -13,11 +12,13 @@ from data.category.Category import Category
 from data.rank.RankReponse import RankResponse
 from data.rank.keyword_rank.KeywordRank import KeywordRank
 from data.shopping.ShoppingInfo import ShoppingInfo
+from data.shopping.ShoppingParam import ShoppingParam
 from data.shopping.ShoppingReponse import ShoppingResponse
 from data.shopping.age_rate.AgeRate import AgeRate
 from data.shopping.click_trend.ClickTrend import ClickTrend
 from data.shopping.device_rate.DeviceRate import DeviceRate
 from data.shopping.gender_rate.GenderRate import GenderRate
+from db.DbConnector import DbConnector
 
 
 class ParserMeta(type):
@@ -34,18 +35,14 @@ class ParserMeta(type):
 
 
 class Parser(metaclass=ParserMeta):
-    CATEGORY_KEYWORD_RANK = "get_category_keyword_rank"
-    CATEGORY_AGE_RATE = "get_category_age_rate"
-    CATEGORY_GENDER_RATE = "get_category_gender_rate"
-    CATEGORY_DEVICE_RATE = "get_category_device_rate"
-    CATEGORY_CLICK_TREND = "get_category_click_trend"
+    CATEGORY_KEYWORD_RANK = "getCategoryKeywordRank"
+    CATEGORY_AGE_RATE = "getCategoryAgeRate"
+    CATEGORY_GENDER_RATE = "getCategoryGenderRate"
+    CATEGORY_DEVICE_RATE = "getCategoryDeviceRate"
+    CATEGORY_CLICK_TREND = "getCategoryClickTrend"
+    CATEGORY = "getCategory"
 
-    URLS = {CATEGORY_CLICK_TREND: "https://datalab.naver.com/shoppingInsight/getCategoryClickTrend.naver",
-            CATEGORY_DEVICE_RATE: "https://datalab.naver.com/shoppingInsight/getCategoryDeviceRate.naver",
-            CATEGORY_GENDER_RATE: "https://datalab.naver.com/shoppingInsight/getCategoryGenderRate.naver",
-            CATEGORY_AGE_RATE: "https://datalab.naver.com/shoppingInsight/getCategoryAgeRate.naver",
-            CATEGORY_KEYWORD_RANK: "https://datalab.naver.com/shoppingInsight/getCategoryKeywordRank.naver"
-            }
+    SHOPPING_INSIGHT_URL = "https://datalab.naver.com/shoppingInsight"
 
     _instance = None
     _inited = False
@@ -66,20 +63,14 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_url(cls, key: str):
-        return cls.URLS.get(key)
+        if key == cls.CATEGORY:
+            return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
+        else:
+            return "{0}/getCategoryClickTrend/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
 
     @classmethod
-    def shopping_request(cls, key: str, params: dict):
-        url = {
-            cls.CATEGORY_AGE_RATE: cls.URLS.get(cls.CATEGORY_AGE_RATE),
-            cls.CATEGORY_GENDER_RATE: cls.URLS.get(cls.CATEGORY_GENDER_RATE),
-            cls.CATEGORY_DEVICE_RATE: cls.URLS.get(cls.CATEGORY_DEVICE_RATE),
-            cls.CATEGORY_CLICK_TREND: cls.URLS.get(cls.CATEGORY_CLICK_TREND)
-        }.get(key, None)
-
-        if url is None:
-            logging.error("Invalid url! url:{}, params:{}".format(url, params))
-            return []
+    def shopping_request(cls, key: str, params: dict) -> (ShoppingParam, list):
+        url = cls.get_url(key)
 
         response: Optional[dict] = cls.datalab_api_call(url, params)
         if response is None:
@@ -107,10 +98,10 @@ class Parser(metaclass=ParserMeta):
                 data_list: list = ClickTrend.parse(data)
                 info_list.append(ShoppingInfo(code, title, full_title, data_list))
 
-        return info_list
+        return shopping_response.shopping_param, info_list
 
     @classmethod
-    def get_keyword_rank(cls, params: dict) -> list:
+    def get_keyword_rank(cls, params: dict) -> (str, list):
         url = cls.get_url(cls.CATEGORY_KEYWORD_RANK)
         response = cls.datalab_api_call(url, params)
         if response is None:
@@ -119,7 +110,7 @@ class Parser(metaclass=ParserMeta):
 
         rank_response = RankResponse.parse(response)
 
-        return KeywordRank.parse(rank_response)
+        return rank_response.range, KeywordRank.parse(rank_response)
 
     @classmethod
     def datalab_api_call(cls, url: str, params: dict, path_params: str = None) -> Optional[dict]:
@@ -148,38 +139,31 @@ class Parser(metaclass=ParserMeta):
                     logging.error("Error to Request. response_code:{}" % response)
                     return None
         except Exception as e:
-            logging.error("Error to Open URL for Request. error:{}" % e.message)
             return None
 
     # Warning: 2019/02/01 기준 카테고리가 4,485개 존재. 50,000,000 ~ 50,004,485
     # 아래 메소드는 모든 카테고리를 재귀를 돌며 데이터 크롤링하는 함수로 시간이 매우 많이 걸림. sleep 없이 사용하면 접근 거부됨.
     @classmethod
-    def get_all_categories(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
-        response = cls.datalab_api_call(url=url,
-                                        params={},
-                                        path_params="cid=%d" % cid
-                                        )
-        categories = Category.parse(response)
+    def insert_all_categories(cls, cid=0):
+        category = cls.get_category(cid=cid)
+        DbConnector().insert_category(category)
 
-        for child_category in categories.child_list:
-            child_cid = child_category.cid
-            full_path = child_category.full_path
-            logging.info(full_path)
-            sleep(3)
+        for child_category in category.child_list:
             if child_category.leaf:
-                return [child_category]
-            grand_child_category_list = cls.get_all_categories(cid=child_cid)
-            child_category.child_list.append(grand_child_category_list)
-
-        return categories
+                DbConnector().insert_category(child_category)
+            else:
+                cls.get_all_categories(child_category.cid)
 
     @classmethod
-    def get_category(cls, url="https://datalab.naver.com/shoppingInsight/getCategory.naver", cid=0):
-        response = cls.datalab_api_call(url=url,
+    def get_category(cls, cid=0):
+        response = cls.datalab_api_call(url=cls.get_url(cls.CATEGORY),
                                         params={},
                                         path_params="cid=%d" % cid
                                         )
-        return Category.parse(response)
+        if response is not None:
+            return Category.parse(response)
+        else:
+            return None
 
     @classmethod
     def get_params(cls, cid: str, end_date: str, start_date: str = "2017-08-01") -> dict:
