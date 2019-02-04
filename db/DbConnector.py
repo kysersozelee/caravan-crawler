@@ -7,6 +7,7 @@ import pandas as pd
 import pytz
 import sqlalchemy as db
 from MySQLdb._exceptions import Error
+from sqlalchemy.exc import SQLAlchemyError
 
 from data.category.Category import Category
 from data.rank.keyword_rank.KeywordRank import KeywordRank
@@ -76,8 +77,16 @@ class DbConnector(metaclass=DbConnectorMeta):
             )
             pass
 
-        result_proxy = self._connection.execute(query, values_list)
-        return result_proxy.inserted_primary_key
+        try:
+            result_proxy = self._connection.execute(query, values_list)
+            return result_proxy.inserted_primary_key
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            logging.error("Error to execute query. query:{}, error:{}".format(query, error))
+            return []
+        except Error as e:
+            logging.error("Error to execute query. query:%s" % query)
+            return []
 
     def insert_rate(self, table_name: str, info_id: int, data_list: list) -> int:
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
@@ -97,6 +106,10 @@ class DbConnector(metaclass=DbConnectorMeta):
         try:
             result_proxy = self._connection.execute(query, values_list)
             return result_proxy.rowcount
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            logging.error("Error to execute query. query:{}, error:{}".format(query, error))
+            return -1
         except Error as e:
             logging.error("Error to execute query. query:%s" % query)
             return -1
@@ -123,7 +136,11 @@ class DbConnector(metaclass=DbConnectorMeta):
         try:
             result_proxy = self._connection.execute(query)
             return result_proxy.inserted_primary_key
-        except Error as e:
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            logging.error("Error to execute query. query:{}, error:{}".format(query, error))
+            return []
+        except Exception as e:
             logging.error("Error to execute query. query:%s" % query)
             return []
 
@@ -144,6 +161,10 @@ class DbConnector(metaclass=DbConnectorMeta):
         try:
             result_proxy = self._connection.execute(query, values_list)
             return result_proxy.rowcount
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            logging.error("Error to execute query. query:{}, error:{}".format(query, error))
+            return -1
         except Error as e:
             logging.error("Error to execute query. query:%s" % query)
             return -1
@@ -162,6 +183,10 @@ class DbConnector(metaclass=DbConnectorMeta):
         try:
             result_proxy = self._connection.execute(query)
             return result_proxy.inserted_primary_key
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            logging.error("Error to execute query. query:{}, error:{}".format(query, error))
+            return []
         except Error as e:
             logging.error("Error to execute query. query:%s" % query)
             return []
