@@ -35,14 +35,14 @@ class ParserMeta(type):
 
 
 class Parser(metaclass=ParserMeta):
-    CATEGORY_KEYWORD_RANK = "getCategoryKeywordRank"
-    CATEGORY_AGE_RATE = "getCategoryAgeRate"
-    CATEGORY_GENDER_RATE = "getCategoryGenderRate"
-    CATEGORY_DEVICE_RATE = "getCategoryDeviceRate"
-    CATEGORY_CLICK_TREND = "getCategoryClickTrend"
-    CATEGORY = "getCategory"
+    CATEGORY_KEYWORD_RANK = "get_category_keyword_rank"
+    CATEGORY_AGE_RATE = "get_category_age_rate"
+    CATEGORY_GENDER_RATE = "get_category_gender_rate"
+    CATEGORY_DEVICE_RATE = "get_category_device_rate"
+    CATEGORY_CLICK_TREND = "get_category_click_trend"
+    CATEGORY = "get_category"
 
-    SHOPPING_INSIGHT_URL = "https://datalab.naver.com/shoppingInsight"
+    SHOPPING_INSIGHT_URL = "https://datalab.naver.com/shoppingInsight/getCategoryClickTrend"
 
     _instance = None
     _inited = False
@@ -63,10 +63,7 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_url(cls, key: str):
-        if key == cls.CATEGORY:
-            return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
-        else:
-            return "{0}/getCategoryClickTrend/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
+        return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
 
     @classmethod
     def shopping_request(cls, key: str, params: dict) -> (ShoppingParam, list):
