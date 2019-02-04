@@ -42,7 +42,7 @@ docker run --name caravan-mysql \
 -e MYSQL_ROOT_PASSWORD=caravan -e MYSQL_USER=caravan \
 -e MYSQL_PASSWORD=caravan -e MYSQL_DATABASE=caravan -d \
 -e TZ=Asia/Seoul \
-mysql:latest --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+mysql:8.0.14 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 ```
 
 ## ETC
