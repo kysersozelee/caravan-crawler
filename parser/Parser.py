@@ -63,10 +63,7 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_url(cls, key: str):
-        if key == cls.CATEGORY:
             return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
-        else:
-            return "{0}/getCategoryClickTrend/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
 
     @classmethod
     def shopping_request(cls, key: str, params: dict) -> (ShoppingParam, list):
