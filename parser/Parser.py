@@ -102,7 +102,7 @@ class Parser(metaclass=ParserMeta):
         response: Optional[dict] = cls.datalab_api_call(url, params, use_random_proxy=use_random_proxy)
         if response is None:
             logging.error("Got Empty Response! url:{}, params:{}".format(url, params))
-            return []
+            return None, []
 
         shopping_response = ShoppingResponse.parse(response)
 
@@ -133,7 +133,7 @@ class Parser(metaclass=ParserMeta):
         response = cls.datalab_api_call(url, params, use_random_proxy=use_random_proxy)
         if response is None:
             logging.error("Got Empty Response! url:{} params:{}".format(url, params))
-            return []
+            return None, []
 
         rank_response = RankResponse.parse(response)
 

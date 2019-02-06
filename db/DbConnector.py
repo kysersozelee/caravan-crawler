@@ -60,14 +60,14 @@ class DbConnector(metaclass=DbConnectorMeta):
         df.columns = results[0].keys()
         df.head(5)
 
-    def insert_info(self, table_name: str, shopping_param: ShoppingParam, shopping_info_list: list) -> list:
+    def insert_info(self, table_name: str, shopping_param: ShoppingParam, shopping_info_list: list):
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.insert(table)
         values_list = []
-        for shopping_info in shopping_info_list:
+        for idx, shopping_info in enumerate(shopping_info_list):
             values_list.append(
-                {'cid': shopping_param.cid,
+                {'cid': shopping_param.cid if not shopping_param.cid.find(",") else shopping_param.cid.split(",")[idx],
                  'code': shopping_info.code,
                  'title': shopping_info.title,
                  'full_title': shopping_info.full_title,
@@ -75,11 +75,20 @@ class DbConnector(metaclass=DbConnectorMeta):
                  'etl_date': datetime.now(pytz.timezone('Asia/Seoul')).strftime('%Y-%m-%d')
                  }
             )
-            pass
 
         try:
             result_proxy = self._connection.execute(query, values_list)
-            return result_proxy.inserted_primary_key
+
+            if result_proxy.rowcount == 0:
+                return None
+            if result_proxy.rowcount == 1:
+                return result_proxy.inserted_primary_key
+            else:
+                inserted_primary_keys = []
+                first_pk = result_proxy.lastrowid
+                for key in range(first_pk, first_pk + result_proxy.rowcount):
+                    inserted_primary_keys.append(key)
+                return inserted_primary_keys
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
@@ -88,7 +97,7 @@ class DbConnector(metaclass=DbConnectorMeta):
             logging.error("Error to execute query. query:%s" % query)
             return []
 
-    def insert_rate(self, table_name: str, info_id: int, data_list: list) -> int:
+    def insert_rate(self, table_name: str, info_id: int, data_list: list):
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.insert(table)
@@ -105,16 +114,25 @@ class DbConnector(metaclass=DbConnectorMeta):
 
         try:
             result_proxy = self._connection.execute(query, values_list)
-            return result_proxy.rowcount
+            if result_proxy.rowcount == 0:
+                return None
+            if result_proxy.rowcount == 1:
+                return result_proxy.inserted_primary_key
+            else:
+                inserted_primary_keys = []
+                first_pk = result_proxy.lastrowid
+                for key in range(first_pk, first_pk + result_proxy.rowcount):
+                    inserted_primary_keys.append(key)
+                return inserted_primary_keys
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
-            return -1
+            return []
         except Error as e:
             logging.error("Error to execute query. query:%s" % query)
-            return -1
+            return []
 
-    def insert_category(self, category: Category) -> list:
+    def insert_category(self, category: Category):
         table = db.Table("category", self._metadata, autoload=True, autoload_with=self._engine)
 
         child_list = list(map(lambda child_category: child_category.cid, category.child_list))
@@ -135,7 +153,15 @@ class DbConnector(metaclass=DbConnectorMeta):
                                         )
         try:
             result_proxy = self._connection.execute(query)
-            return result_proxy.inserted_primary_key
+            if result_proxy.rowcount == 0:
+                return None
+            if result_proxy.rowcount == 1:
+                return result_proxy.inserted_primary_key
+            else:
+                inserted_primary_keys = []
+                first_pk = result_proxy.lastrowid
+                for key in range(first_pk, first_pk + result_proxy.rowcount):
+                    inserted_primary_keys.append(key)
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
@@ -156,7 +182,6 @@ class DbConnector(metaclass=DbConnectorMeta):
                  'value': data.value
                  }
             )
-            pass
 
         try:
             result_proxy = self._connection.execute(query, values_list)
