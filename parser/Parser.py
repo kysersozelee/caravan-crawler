@@ -5,6 +5,7 @@ import json
 import logging
 import random
 import ssl
+import time
 import urllib.request
 from time import sleep
 from typing import Optional
@@ -89,6 +90,7 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def random_proxy(cls):
+        random.seed(time.clock())
         return random.randint(0, len(cls._proxies) - 1)
 
     @classmethod
@@ -154,7 +156,7 @@ class Parser(metaclass=ParserMeta):
         req.add_header("Content-Type", "application/x-www-form-urlencoded")
         req.add_header("referer", "https://datalab.naver.com/shoppingInsight/sCategory.naver")
 
-        for i in range(1, 3):
+        for i in range(1, 10):
 
             if use_random_proxy:
                 proxy = cls.get_random_proxy()
@@ -207,7 +209,7 @@ class Parser(metaclass=ParserMeta):
     @classmethod
     def get_params(cls, cid: str, end_date: str, start_date: str = "2017-08-01") -> dict:
         return {"cid": cid,
-                "timeUnit": "date",
+                "timeUnit": "month",
                 "startDate": start_date,
                 "endDate": end_date,
                 "device": "pc,mo",

@@ -3,10 +3,8 @@
 import logging
 from datetime import datetime
 
-import pandas as pd
 import pytz
 import sqlalchemy as db
-from MySQLdb._exceptions import Error
 from sqlalchemy.exc import SQLAlchemyError
 
 from data.category.Category import Category
@@ -51,14 +49,28 @@ class DbConnector(metaclass=DbConnectorMeta):
     def __del__(self):
         self._connection.close()
 
-    def select(self, table_name):
+    def select_category(self, table_name, category_id=None):
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
 
-        query = db.select([table])
+        query = db.select([table]) if category_id is None else db.select([table]).where(
+            table.columns.id == category_id)
+
         results = self._connection.execute(query).fetchall()
-        df = pd.DataFrame(results)
-        df.columns = results[0].keys()
-        df.head(5)
+        if category_id is None:
+            return results
+        else:
+            return results[0] if len(results) > 0 else None
+
+    def select_distinct_keyword_rank(self, table_name="keyword_rank"):
+        table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
+
+        query = db \
+            .select([table.columns.cid, table.columns.keyword]) \
+            .distinct(table.columns.cid, table.columns.keyword) \
+            .group_by(table.columns.cid, table.columns.keyword)
+
+        results = self._connection.execute(query).fetchall()
+        return results
 
     def insert_info(self, table_name: str, shopping_param: ShoppingParam, shopping_info_list: list):
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
@@ -71,7 +83,9 @@ class DbConnector(metaclass=DbConnectorMeta):
                  'code': shopping_info.code,
                  'title': shopping_info.title,
                  'full_title': shopping_info.full_title,
-                 'date_range': shopping_param.date_range,
+                 'keyword': shopping_param.keyword,
+                 'start_date': shopping_param.date_range.split("~")[0].replace(" ","").replace(".","-")[:10],
+                 'end_date': shopping_param.date_range.split("~")[1].replace(" ","").replace(".","-")[:10],
                  'etl_date': datetime.now(pytz.timezone('Asia/Seoul')).strftime('%Y-%m-%d')
                  }
             )
@@ -93,7 +107,7 @@ class DbConnector(metaclass=DbConnectorMeta):
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
             return []
-        except Error as e:
+        except Exception as e:
             logging.error("Error to execute query. query:%s" % query)
             return []
 
@@ -128,7 +142,7 @@ class DbConnector(metaclass=DbConnectorMeta):
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
             return []
-        except Error as e:
+        except Exception as e:
             logging.error("Error to execute query. query:%s" % query)
             return []
 
@@ -190,16 +204,18 @@ class DbConnector(metaclass=DbConnectorMeta):
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
             return -1
-        except Error as e:
+        except Exception as e:
             logging.error("Error to execute query. query:%s" % query)
             return -1
 
-    # TODO : range 추가
-    def insert_rank(self, table_name: str, range: str, keyword_rank: KeywordRank):
+    def insert_rank(self, table_name: str, keyword_rank: KeywordRank, cid: str, start_date: str, end_date: str):
 
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
 
-        query = db.insert(table).values(rank=keyword_rank.rank,
+        query = db.insert(table).values(cid=cid,
+                                        start_date=start_date,
+                                        end_date=end_date,
+                                        rank=keyword_rank.rank,
                                         keyword=keyword_rank.keyword,
                                         link_id=keyword_rank.link_id,
                                         etl_date=datetime.now(pytz.timezone('Asia/Seoul')).strftime('%Y-%m-%d')
@@ -212,6 +228,12 @@ class DbConnector(metaclass=DbConnectorMeta):
             error = str(e.__dict__['orig'])
             logging.error("Error to execute query. query:{}, error:{}".format(query, error))
             return []
-        except Error as e:
+        except Exception as e:
             logging.error("Error to execute query. query:%s" % query)
             return []
+
+    @staticmethod
+    def print_rank(keyword_rank: KeywordRank, cid: str, start_date: str, end_date: str):
+        print("{}\t{}\t{}\t{}\t{}\t{}\t{};".format(cid, start_date, end_date, keyword_rank.rank, keyword_rank.keyword,
+                                                   keyword_rank.link_id,
+                                                   end_date))
