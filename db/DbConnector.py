@@ -41,7 +41,11 @@ class DbConnector(metaclass=DbConnectorMeta):
         logging.getLogger().setLevel(logging.INFO)
 
         # TODO: db 정보 환경변수로 받기, cp 관련 설정 튜닝
-        self._engine = db.create_engine('mysql://caravan:caravan@0.0.0.0:3308/caravan')
+        self._engine = db.create_engine('mysql://caravan:caravan@0.0.0.0:3308/caravan',
+                                        pool_size=10,
+                                        max_overflow=0,
+                                        pool_recycle=3600
+                                        )
         self._connection = self._engine.connect()
         self._metadata = db.MetaData()
         self._inited = True
