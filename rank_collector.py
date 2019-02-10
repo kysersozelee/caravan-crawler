@@ -22,7 +22,7 @@ def collect_rank(cid, start_date, end_date):
 pool = Pool(processes=8)
 
 if __name__ == "__main__":
-    selected_category_list = DbConnector().select_category("category")
+    selected_category_list = DbConnector().select_category()
 
     result = []
     for category in selected_category_list:

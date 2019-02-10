@@ -7,7 +7,6 @@ import random
 import ssl
 import time
 import urllib.request
-from time import sleep
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -95,7 +94,7 @@ class Parser(metaclass=ParserMeta):
 
     @classmethod
     def get_url(cls, key: str):
-            return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
+        return "{0}/{1}.naver".format(cls.SHOPPING_INSIGHT_URL, key)
 
     @classmethod
     def shopping_request(cls, key: str, params: dict, use_random_proxy=False) -> (ShoppingParam, list):

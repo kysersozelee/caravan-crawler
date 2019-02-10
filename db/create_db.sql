@@ -29,9 +29,6 @@ create table keyword_rank
   foreign key (cid) references category (id)
 );
 
-create index keyword_rank_cid_fk
-  on keyword_rank (cid);
-
 create index keyword_rank_start_date_keyword_rank_idx_index
   on keyword_rank (start_date, keyword);
 
@@ -48,6 +45,9 @@ CREATE TABLE age_rate_info
     etl_date date,
     CONSTRAINT age_rate_cid_fk FOREIGN KEY (cid) REFERENCES category (id)
 );
+
+create age_rate_info_start_date_keyword_cid_index
+  on age_rate_info (start_date, keyword, cid);
 
 CREATE TABLE age_rate
 (
@@ -68,10 +68,13 @@ CREATE TABLE click_trend_info
     full_title varchar(200),
     keyword varchar(200),
     start_date date,
-    end_date varchar(200),
+    end_date date,
     etl_date date,
     CONSTRAINT click_trend_cid_fk FOREIGN KEY (cid) REFERENCES category (id)
 );
+
+create click_trend_info_start_date_keyword_cid_index
+  on click_trend_info (start_date, keyword, cid);
 
 CREATE TABLE click_trend
 (
@@ -82,7 +85,6 @@ CREATE TABLE click_trend
     CONSTRAINT click_trend_info_fk FOREIGN KEY (info_id) REFERENCES click_trend_info (id)
 );
 
-
 CREATE TABLE device_rate_info
 (
     id int(10) PRIMARY KEY AUTO_INCREMENT,
@@ -92,10 +94,13 @@ CREATE TABLE device_rate_info
     keyword varchar(200),
     full_title varchar(200),
     start_date date,
-    end_date varchar(200),
+    end_date date,
     etl_date date,
     CONSTRAINT device_rate_cid_fk FOREIGN KEY (cid) REFERENCES category (id)
 );
+
+create index device_rate_info_start_date_keyword_cid_index
+  on device_rate_info (start_date, keyword, cid);
 
 CREATE TABLE device_rate
 (
@@ -107,8 +112,6 @@ CREATE TABLE device_rate
     CONSTRAINT device_rate_fk FOREIGN KEY (info_id) REFERENCES device_rate_info (id)
 );
 
-
-
 CREATE TABLE gender_rate_info
 (
     id int(10) PRIMARY KEY AUTO_INCREMENT,
@@ -118,10 +121,13 @@ CREATE TABLE gender_rate_info
     full_title varchar(200),
     keyword varchar(200),
     start_date date,
-    end_date varchar(200),
+    end_date date,
     etl_date date,
     CONSTRAINT gender_rate_cid_fk FOREIGN KEY (cid) REFERENCES category (id)
 );
+
+create index gender_rate_info_start_date_keyword_cid_index
+  on gender_rate_info (start_date, keyword, cid);
 
 CREATE TABLE gender_rate
 (

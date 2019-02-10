@@ -49,8 +49,8 @@ class DbConnector(metaclass=DbConnectorMeta):
     def __del__(self):
         self._connection.close()
 
-    def select_category(self, table_name, category_id=None):
-        table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
+    def select_category(self, category_id=None):
+        table = db.Table("category", self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.select([table]) if category_id is None else db.select([table]).where(
             table.columns.id == category_id)
@@ -61,18 +61,19 @@ class DbConnector(metaclass=DbConnectorMeta):
         else:
             return results[0] if len(results) > 0 else None
 
-    def select_distinct_keyword_rank(self, table_name="keyword_rank"):
-        table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
+    def select_distinct_keyword_rank(self, start_id=None, end_id=None):
+        table = db.Table("keyword_rank", self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db \
             .select([table.columns.cid, table.columns.keyword]) \
+            .where(db.and_(int(start_id) <= table.columns.cid, int(end_id) > table.columns.cid)) \
             .distinct(table.columns.cid, table.columns.keyword) \
-            .group_by(table.columns.cid, table.columns.keyword)
+            .group_by(table.columns.cid, table.columns.cid, table.columns.keyword)
 
         results = self._connection.execute(query).fetchall()
         return results
 
-    def insert_info(self, table_name: str, shopping_param: ShoppingParam, shopping_info_list: list):
+    def insert_info(self, table_name, shopping_param: ShoppingParam, shopping_info_list: list):
         table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.insert(table)
@@ -84,8 +85,8 @@ class DbConnector(metaclass=DbConnectorMeta):
                  'title': shopping_info.title,
                  'full_title': shopping_info.full_title,
                  'keyword': shopping_param.keyword,
-                 'start_date': shopping_param.date_range.split("~")[0].replace(" ","").replace(".","-")[:10],
-                 'end_date': shopping_param.date_range.split("~")[1].replace(" ","").replace(".","-")[:10],
+                 'start_date': shopping_param.date_range.split("~")[0].replace(" ", "").replace(".", "-")[:10],
+                 'end_date': shopping_param.date_range.split("~")[1].replace(" ", "").replace(".", "-")[:10],
                  'etl_date': datetime.now(pytz.timezone('Asia/Seoul')).strftime('%Y-%m-%d')
                  }
             )
@@ -111,8 +112,8 @@ class DbConnector(metaclass=DbConnectorMeta):
             logging.error("Error to execute query. query:%s" % query)
             return []
 
-    def insert_rate(self, table_name: str, info_id: int, data_list: list):
-        table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
+    def insert_rate(self, info_id: int, data_list: list):
+        table = db.Table("age_rate", self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.insert(table)
         values_list = []
@@ -184,8 +185,8 @@ class DbConnector(metaclass=DbConnectorMeta):
             logging.error("Error to execute query. query:%s" % query)
             return []
 
-    def insert_trend(self, table_name: str, info_id: int, data_list: list) -> int:
-        table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
+    def insert_trend(self, info_id: int, data_list: list) -> int:
+        table = db.Table("click_trend", self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.insert(table)
         values_list = []
@@ -208,9 +209,9 @@ class DbConnector(metaclass=DbConnectorMeta):
             logging.error("Error to execute query. query:%s" % query)
             return -1
 
-    def insert_rank(self, table_name: str, keyword_rank: KeywordRank, cid: str, start_date: str, end_date: str):
+    def insert_rank(self, keyword_rank: KeywordRank, cid: str, start_date: str, end_date: str):
 
-        table = db.Table(table_name, self._metadata, autoload=True, autoload_with=self._engine)
+        table = db.Table("keyword_rank", self._metadata, autoload=True, autoload_with=self._engine)
 
         query = db.insert(table).values(cid=cid,
                                         start_date=start_date,
